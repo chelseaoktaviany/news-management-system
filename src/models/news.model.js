@@ -16,8 +16,12 @@ const News = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    created_at: {
+      type: DataTypes.DATE,
+      default: Date.now(),
+    },
   },
-  { tableName: "news", createdAt: [true, "created_at"] }
+  { tableName: "news" }
 );
 
-module.exports = news;
+module.exports = News;

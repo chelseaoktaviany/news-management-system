@@ -4,4 +4,5 @@ const ctrl = require("../controllers/news.controller");
 
 router.post("/", ctrl.createNews);
 router.get("/", ctrl.listNews);
-router.get;
+
+module.exports = router;

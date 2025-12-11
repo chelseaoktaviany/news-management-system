@@ -43,3 +43,5 @@ const listNews = async (req, res) => {
   // show all news
   res.status(200).json({ page: page, limit: limit, total: offset, data: news });
 };
+
+module.exports = { createNews, listNews };

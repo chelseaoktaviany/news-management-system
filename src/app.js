@@ -52,6 +52,13 @@ const start = async () => {
   } catch (e) {
     console.warn("ES not ready yet", e.message);
   }
+
+  // check if its connected
+  es.client
+    .info()
+    .then((res) => console.log(res))
+    .catch((err) => console.error(err));
+
   app.listen(PORT, () => console.log(`App listening on ${PORT}`));
 };
 

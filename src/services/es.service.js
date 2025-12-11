@@ -2,34 +2,35 @@ const { Client } = require("@elastic/elasticsearch");
 const client = new Client({
   node: process.env.ELASTIC_URL || "http://localhost:9200",
 });
+
 const INDEX = process.env.ELASTIC_INDEX || "news";
 
 async function ensureIndex() {
   const exists = await client.indices.exists({ index: INDEX });
-}
 
-if (!exists) {
-  await client.indices.create({
-    index: INDEX,
-    body: {
-      mappings: {
-        properties: {
-          id: { type: "integer" },
-          title: { type: "text" },
-          content: { type: "text" },
-          author: {
-            type: "text",
-          },
-          source: {
-            type: "text",
-          },
-          createdAt: {
-            type: "date",
+  if (!exists) {
+    await client.indices.create({
+      index: INDEX,
+      body: {
+        mappings: {
+          properties: {
+            id: { type: "integer" },
+            title: { type: "text" },
+            content: { type: "text" },
+            author: {
+              type: "text",
+            },
+            source: {
+              type: "text",
+            },
+            created_at: {
+              type: "date",
+            },
           },
         },
       },
-    },
-  });
+    });
+  }
 }
 
 async function indexNews(news) {
@@ -48,7 +49,7 @@ async function searchNews(q) {
       query: {
         multi_match: {
           query: q,
-          fields: ["title^3", "content", "author", "source", "createdAt"],
+          fields: ["title^3", "content", "author", "source", "created_at"],
         },
       },
     },
