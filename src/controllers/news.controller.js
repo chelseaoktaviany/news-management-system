@@ -31,17 +31,19 @@ const createNews = async (req, res) => {
 
 const listNews = async (req, res) => {
   const page = parseInt(req.query.page || "1");
-  const limit = parseInt(req.query.page || "10");
-  const offset = (page - 1) * limit;
+  const perPage = parseInt(req.query.perPage || "10");
+  const offset = (page - 1) * perPage;
 
   const news = await News.findAll({
     limit: perPage,
     offset,
-    order: [["createdAt", "DESC"]],
+    order: [["created_at", "DESC"]],
   });
 
   // show all news
-  res.status(200).json({ page: page, limit: limit, total: offset, data: news });
+  res
+    .status(200)
+    .json({ page: page, limit: perPage, total: news.length, data: news });
 };
 
 module.exports = { createNews, listNews };
