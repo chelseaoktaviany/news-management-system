@@ -21,7 +21,7 @@ const News = sequelize.define(
       default: Date.now(),
     },
   },
-  { tableName: "news" }
+  { tableName: "news", createdAt: false, updatedAt: false }
 );
 
 module.exports = News;
