@@ -49,7 +49,7 @@ async function searchNews(q) {
       query: {
         multi_match: {
           query: q,
-          fields: ["title^3", "content", "author", "source", "created_at"],
+          fields: ["title", "content", "author", "source"],
         },
       },
     },

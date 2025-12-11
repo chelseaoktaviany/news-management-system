@@ -1,7 +1,7 @@
 const amqp = require("amqplib");
 
 let channel = null;
-const QUEUE = "article_index_queue";
+const QUEUE = "news_index_queue";
 
 async function connect() {
   if (channel) return channel;

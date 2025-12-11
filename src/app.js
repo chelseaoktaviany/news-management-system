@@ -20,7 +20,7 @@ app.get("/api/search", async (req, res) => {
   if (!q) return res.json([]);
 
   try {
-    const results = await es.searchArticles(q);
+    const results = await es.searchNews(q);
     res.json(results);
   } catch (err) {
     console.warn("ES search failed, fallback to MySQL", err.message);

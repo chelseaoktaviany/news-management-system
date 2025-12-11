@@ -20,7 +20,7 @@ const runWorker = async () => {
       try {
         const payload = JSON.parse(msg.content.toString());
         if (payload.action === "index" && payload.news) {
-          await es.indexArticle(payload.news);
+          await es.indexNews(payload.news);
         }
         ch.ack(msg);
       } catch (err) {
