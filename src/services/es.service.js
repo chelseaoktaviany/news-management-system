@@ -9,6 +9,8 @@ async function ensureIndex() {
   const exists = await client.indices.exists({ index: INDEX });
 
   if (!exists) {
+    console.log("Index not found - creating news...");
+
     await client.indices.create({
       index: INDEX,
       body: {
@@ -30,6 +32,10 @@ async function ensureIndex() {
         },
       },
     });
+
+    console.log("Index created");
+  } else {
+    console.log("Index exists:", INDEX);
   }
 }
 
@@ -42,18 +48,29 @@ async function indexNews(news) {
   });
 }
 
+async function deleteNews(id) {
+  try {
+    await client.delete({
+      index: INDEX,
+      id: id.toString(),
+    });
+  } catch (err) {
+    console.log("ES deleteNews error:", err.message);
+    throw err;
+  }
+}
+
 async function searchNews(q) {
   const resp = await client.search({
     index: INDEX,
-    body: {
-      query: {
-        multi_match: {
-          query: q,
-          fields: ["title", "content", "author", "source"],
-        },
+    query: {
+      multi_match: {
+        query: q,
+        fields: ["title", "content", "author", "source"],
       },
     },
   });
+
   return resp.hits.hits.map((h) => h._source);
 }
 

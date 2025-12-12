@@ -18,7 +18,6 @@ const News = sequelize.define(
     },
     created_at: {
       type: DataTypes.DATE,
-      default: Date.now(),
     },
   },
   { tableName: "news", createdAt: false, updatedAt: false }

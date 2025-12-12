@@ -14,14 +14,19 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/news", newsRoutes);
 
-// search
+// search query
 app.get("/api/search", async (req, res) => {
-  const q = req.query.q || "";
+  const { q } = req.query || "";
+
+  console.log(q);
+
   if (!q) return res.json([]);
 
   try {
     const results = await es.searchNews(q);
     res.json(results);
+
+    console.log(`Search for "${q}" returned ${results.length} results from ES`);
   } catch (err) {
     console.warn("ES search failed, fallback to MySQL", err.message);
 
@@ -29,8 +34,8 @@ app.get("/api/search", async (req, res) => {
     const news = await News.findAll({
       where: {
         [require("sequelize").Op.or]: [
-          { title: { [require("sequelize").Op.like]: `%${q}` } },
-          { content: { [require("sequelize").Op.like]: `%${q}` } },
+          { title: { [require("sequelize").Op.like]: `%${q}%` } },
+          { content: { [require("sequelize").Op.like]: `%${q}%` } },
         ],
       },
       limit: 10,
@@ -49,6 +54,8 @@ const start = async () => {
   // ensure ES index exists
   try {
     await es.ensureIndex();
+
+    console.log("Elasticsearch index is ready");
   } catch (e) {
     console.warn("ES not ready yet", e.message);
   }

@@ -1,8 +1,8 @@
-requestAnimationFrame("dotenv").config();
+require("dotenv").config();
 const mq = require("./services/mq.service");
 const es = require("./services/es.service");
 
-const QUEUE = "news_index_queue";
+const QUEUE = mq.QUEUE;
 
 const runWorker = async () => {
   const ch = await mq.connect();
@@ -10,30 +10,38 @@ const runWorker = async () => {
   // ensure ES index
   try {
     await es.ensureIndex();
+
+    // consume ke elasticsearch
+    ch.consume(
+      QUEUE,
+      async (msg) => {
+        if (!msg) return;
+        try {
+          const payload = JSON.parse(msg.content.toString());
+
+          console.log("Worker received job:", payload);
+
+          if (payload.action === "index" && payload.news) {
+            await es.indexNews(payload.news);
+          } else if (payload.action === "delete" && payload.id) {
+            await es.deleteNews(payload.id);
+          }
+          ch.ack(msg);
+        } catch (err) {
+          console.error("Worker error", err);
+          ch.ack(msg);
+        }
+      },
+      { noAck: false }
+    );
+
+    console.log("Worker starter, listening for index jobs");
   } catch (e) {
     console.error("ES ensureIndex failed: ", e.message);
   }
-  ch.consume(
-    QUEUE,
-    async (msg) => {
-      if (!msg) return;
-      try {
-        const payload = JSON.parse(msg.content.toString());
-        if (payload.action === "index" && payload.news) {
-          await es.indexNews(payload.news);
-        }
-        ch.ack(msg);
-      } catch (err) {
-        console.error("Worker error", err);
-        ch.ack(msg);
-      }
-    },
-    { noAck: false }
-  );
-  console.log("Worker starter, listening for index jobs");
 };
 
-runWorker.catch((err) => {
+runWorker().catch((err) => {
   console.error("Worker failed", err);
-  ProcessingInstruction.exit(1);
+  process.exit(1);
 });
