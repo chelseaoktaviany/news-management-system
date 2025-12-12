@@ -1,8 +1,10 @@
 "use strict";
 
+const { publishNewsIndex } = require("../services/mq.service");
+
 module.exports = {
-  async up(queryInterface) {
-    return queryInterface.bulkInsert("news", [
+  async up(queryInterface, Sequelize) {
+    const data = [
       {
         title:
           "Pemerintah Resmikan Proyek Energi Terbarukan Terbesar di Asia Tenggara",
@@ -44,7 +46,25 @@ module.exports = {
         source: "EkonomiID",
         created_at: new Date("2025-01-25 09:05:00"),
       },
-    ]);
+    ];
+
+    // insert data into the "news" table
+    await queryInterface.bulkInsert("news", data);
+
+    // take all datas from mysql database
+    const inserted = await queryInterface.sequelize.query(
+      `SELECT * FROM news ORDER BY id DESC LIMIT ${data.length}`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    // publish one per one to rabbitmq
+    for (const news of inserted) {
+      await publishNewsIndex(news);
+    }
+
+    console.log(
+      `Published ${inserted.length} seeded news to RabbitMQ for indexing.`
+    );
   },
 
   async down(queryInterface) {
