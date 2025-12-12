@@ -18,8 +18,6 @@ app.use("/api/news", newsRoutes);
 app.get("/api/search", async (req, res) => {
   const { q } = req.query || "";
 
-  console.log(q);
-
   if (!q) return res.json([]);
 
   try {
